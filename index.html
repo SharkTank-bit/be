@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Valentine 💕</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: "Times New Roman", Times, serif;
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #ffd6e8;
+    transition: filter 1s ease, background 1s ease;
+  }
+
+  .page {
+    position: absolute;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .page.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text {
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    color: #e75480;
+    animation: bounce 2s infinite;
+    position: relative;
+  }
+
+  .text::after {
+    content: "✨";
+    position: absolute;
+    right: -1.5rem;
+    top: -1rem;
+    animation: sparkle 1.5s infinite;
+  }
+
+  .message {
+    margin-top: 20px;
+    font-size: 1.6rem;
+    color: #e75480;
+  }
+
+  .alt-text {
+    margin-top: 15px;
+    font-size: 1.5rem;
+    color: #7a2c3f;
+    display: none;
+  }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  @keyframes sparkle {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(0.5); }
+  }
+
+  .buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+  }
+
+  button {
+    font-size: 1.2rem;
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .yes {
+    background: #ff5fa2;
+    color: white;
+  }
+
+  .no {
+    background: white;
+    color: #e75480;
+  }
+
+  .gloomy {
+    filter: grayscale(1) brightness(0.6);
+    background: #bdbdbd;
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- PAGE 1 -->
+<div class="page active" id="page1">
+  <div class="text">will you be my valentine 💘</div>
+  <div class="alt-text" id="altText">that’s not an option</div>
+
+  <div class="buttons">
+    <button class="yes" id="yesBtn">Yes 💖</button>
+    <button class="no" id="noBtn">No 🙈</button>
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page2">
+  <div class="text">she said yes 💍💖</div>
+  <div class="message">
+    i love you to the moon and back my moonpie 🌙💖
+  </div>
+</div>
+
+<!-- MUSIC -->
+<audio id="happyMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5a3bafc68f.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sadMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_35c8e9c7f1.mp3" type="audio/mpeg">
+</audio>
+
+<canvas id="confetti"></canvas>
+<canvas id="fireworks"></canvas>
+
+<script>
+const page1 = document.getElementById("page1");
+const page2 = document.getElementById("page2");
+const noBtn = document.getElementById("noBtn");
+const altText = document.getElementById("altText");
+const happyMusic = document.getElementById("happyMusic");
+const sadMusic = document.getElementById("sadMusic");
+
+/* NO BUTTON */
+noBtn.addEventListener("click", () => {
+  noBtn.style.display = "none";
+  altText.style.display = "block";
+  document.body.classList.add("gloomy");
+  happyMusic.pause();
+  sadMusic.play();
+});
+
+/* YES BUTTON */
+document.getElementById("yesBtn").addEventListener("click", () => {
+  page1.classList.remove("active");
+  page2.classList.add("active");
+  document.body.classList.remove("gloomy");
+  sadMusic.pause();
+  happyMusic.play();
+  startConfetti();
+  launchFireworks();
+});
+
+/* CANVAS */
+const confettiCanvas = document.getElementById("confetti");
+const fireworksCanvas = document.getElementById("fireworks");
+const cctx = confettiCanvas.getContext("2d");
+const fctx = fireworksCanvas.getContext("2d");
+
+function resize() {
+  confettiCanvas.width = fireworksCanvas.width = window.innerWidth;
+  confettiCanvas.height = fireworksCanvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+/* HEART CONFETTI */
+const hearts=[];
+function drawHeart(x,y,s,c){
+  cctx.fillStyle=c;
+  cctx.beginPath();
+  cctx.moveTo(x,y);
+  cctx.bezierCurveTo(x-s,y-s,x-s*2,y+s,x,y+s*2);
+  cctx.bezierCurveTo(x+s*2,y+s,x+s,y-s,x,y);
+  cctx.fill();
+}
+
+function startConfetti(){
+  for(let i=0;i<120;i++){
+    hearts.push({
+      x:Math.random()*confettiCanvas.width,
+      y:Math.random()*-confettiCanvas.height,
+      s:Math.random()*6+6,
+      sp:Math.random()*1.5+1,
+      c:["#ff69b4","#ffc0cb","#ff85a2","#e75480"][Math.floor(Math.random()*4)]
+    });
+  }
+
+  function loop(){
+    cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    hearts.forEach(h=>{
+      drawHeart(h.x,h.y,h.s,h.c);
+      h.y+=h.sp;
+      if(h.y>confettiCanvas.height) h.y=-20;
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* FIREWORKS */
+const particles=[];
+function launchFireworks(){
+  for(let i=0;i<5;i++){
+    const x=Math.random()*window.innerWidth;
+    const y=Math.random()*window.innerHeight*0.5;
+    for(let j=0;j<80;j++){
+      particles.push({
+        x,y,
+        vx:Math.cos(j)*(Math.random()*4),
+        vy:Math.sin(j)*(Math.random()*4),
+        life:60,
+        c:["#ff5fa2","#ffffff","#ff85a2"][Math.floor(Math.random()*3)]
+      });
+    }
+  }
+
+  function loop(){
+    fctx.clearRect(0,0,fireworksCanvas.width,fireworksCanvas.height);
+    particles.forEach((p,i)=>{
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.life--;
+      fctx.fillStyle=p.c;
+      fctx.fillRect(p.x,p.y,3,3);
+      if(p.life<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+</script>
+
+</body>
+</html>
